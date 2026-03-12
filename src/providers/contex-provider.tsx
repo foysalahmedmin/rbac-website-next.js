@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 
+import { AuthProvider } from "./auth-provider";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -14,6 +16,8 @@ const queryClient = new QueryClient({
 
 export function ContextProvider({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>{children}</AuthProvider>
+    </QueryClientProvider>
   );
 }
