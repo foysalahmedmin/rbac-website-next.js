@@ -1,22 +1,21 @@
-import { api } from "@/lib/api";
-import { ILoginResponse } from "@/types/auth.type";
+import { api, setAccessToken } from "@/lib/api";
+import { ILoginResponse, IRefreshTokenResponse } from "@/types/auth.type";
 
 export const authService = {
-  login: async (data: any): Promise<ILoginResponse> => {
+  login: async (data: unknown): Promise<ILoginResponse> => {
     return api.post("/auth/signin", data);
   },
 
-  register: async (data: any): Promise<ILoginResponse> => {
+  register: async (data: unknown): Promise<ILoginResponse> => {
     return api.post("/auth/signup", data);
   },
 
-  refreshToken: async (): Promise<any> => {
+  refreshToken: async (): Promise<IRefreshTokenResponse> => {
     return api.post("/auth/refresh-token");
   },
 
   logout: async () => {
-    // Usually a post to clear cookie or just client-side clear
-    localStorage.removeItem("accessToken");
+    setAccessToken(null);
     localStorage.removeItem("user");
   },
 };

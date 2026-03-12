@@ -22,30 +22,52 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+import { setAccessToken } from "@/lib/api";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("accessToken");
+    const initializeAuth = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
 
-    if (storedUser && token && !user) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, [user]);
+        // Try to get a fresh access token using the refresh token cookie
+        const response = await authService.refreshToken();
+        if (response.success) {
+          setAccessToken(response.data.access_token);
+          setUser(response.data.info);
+          localStorage.setItem("user", JSON.stringify(response.data.info));
+        }
+      } catch (error) {
+        console.error("Auth initialization failed:", error);
+        // If refresh fails, we might still have a stored user, but no token.
+        // We should probably clear it if we want strict security.
+        // localStorage.removeItem("user");
+        // setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = (token: string, user: IAuthUser) => {
-    localStorage.setItem("accessToken", token);
+    setAccessToken(token);
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
     router.push("/dashboard");
   };
 
   const logout = () => {
-    authService.logout();
+    setAccessToken(null);
+    localStorage.removeItem("user");
     setUser(null);
     router.push("/signin");
   };

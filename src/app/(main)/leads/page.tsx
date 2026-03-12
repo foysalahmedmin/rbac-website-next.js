@@ -1,6 +1,5 @@
 "use client";
 
-import { PermissionManager } from "@/components/dashboard/permission-manager";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,22 +14,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/providers/auth-provider";
-import { userService } from "@/services/user.service";
-import { IUser } from "@/types/user.type";
+import { leadService } from "@/services/lead.service";
+import { ILead } from "@/types/lead.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
-import {
-  Ban,
-  KeyRound,
-  Loader2,
-  MoreHorizontal,
-  ShieldCheck,
-  UserCog,
-} from "lucide-react";
+import { Edit, Loader2, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function UsersPage() {
+export default function LeadsPage() {
   const { hasPermission } = useAuth();
   const queryClient = useQueryClient();
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -38,13 +30,9 @@ export default function UsersPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [search, setSearch] = useState("");
 
-  // Permission Manager State
-  const [isPermManagerOpen, setIsPermManagerOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
-
   const { data, isLoading, error } = useQuery({
     queryKey: [
-      "users",
+      "leads",
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
@@ -55,85 +43,73 @@ export default function UsersPage() {
         .map((s) => (s.desc ? `-${s.id}` : s.id))
         .join(",");
 
-      return userService.getAll({
+      return leadService.getAll({
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
-        include: "direct_permissions",
         ...(sortParams ? { sort: sortParams } : {}),
         ...(search ? { search } : {}),
       });
     },
   });
 
-  const suspendMutation = useMutation({
-    mutationFn: (id: number) => userService.suspend(id),
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => leadService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User suspended successfully");
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      toast.success("Lead deleted successfully");
     },
     onError: (error: Error) =>
-      toast.error(error.message || "Failed to suspend user"),
+      toast.error(error.message || "Failed to delete lead"),
     onSettled: () => setIsActionLoading(false),
   });
 
-  const banMutation = useMutation({
-    mutationFn: (id: number) => userService.ban(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User banned successfully");
-    },
-    onError: (error: Error) =>
-      toast.error(error.message || "Failed to ban user"),
-    onSettled: () => setIsActionLoading(false),
-  });
-
-  const handleSuspend = (id: number) => {
-    setIsActionLoading(true);
-    suspendMutation.mutate(id);
-  };
-
-  const handleBan = (id: number) => {
-    setIsActionLoading(true);
-    banMutation.mutate(id);
-  };
-
-  const handleOpenPermManager = (user: IUser) => {
-    setSelectedUser(user);
-    setIsPermManagerOpen(true);
+  const handleDelete = (id: number) => {
+    if (confirm("Are you sure you want to delete this lead?")) {
+      setIsActionLoading(true);
+      deleteMutation.mutate(id);
+    }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "active":
+      case "new":
         return (
-          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
-            Active
+          <Badge className="bg-blue-500/20 text-blue-500 hover:bg-blue-500/30">
+            New
           </Badge>
         );
-      case "suspended":
+      case "contacted":
         return (
-          <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30">
-            Suspended
+          <Badge className="bg-orange-500/20 text-orange-500 hover:bg-orange-500/30">
+            Contacted
           </Badge>
         );
-      case "banned":
+      case "qualified":
         return (
-          <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/80">
-            Banned
+          <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
+            Qualified
           </Badge>
+        );
+      case "lost":
+        return <Badge variant="destructive">Lost</Badge>;
+      case "won":
+        return (
+          <Badge className="bg-primary text-primary-foreground">Won</Badge>
         );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
-  const columns: ColumnDef<IUser>[] = [
+  const columns: ColumnDef<ILead>[] = [
     {
       accessorKey: "name",
       header: "Name",
-      enableSorting: true,
+      enableSorting: false,
       cell: ({ row }) => (
-        <span className="font-medium text-foreground">{row.original.name}</span>
+        <span className="font-medium text-foreground">
+          {row.original.first_name} {row.original.last_name}
+        </span>
       ),
     },
     {
@@ -145,16 +121,13 @@ export default function UsersPage() {
       ),
     },
     {
-      accessorKey: "role",
-      header: "Role",
-      enableSorting: false,
+      accessorKey: "source",
+      header: "Source",
+      enableSorting: true,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-foreground">
-          <ShieldCheck className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground capitalize">
-            {row.original.role.name}
-          </span>
-        </div>
+        <span className="text-muted-foreground">
+          {row.original.source || "Unknown"}
+        </span>
       ),
     },
     {
@@ -163,15 +136,25 @@ export default function UsersPage() {
       enableSorting: true,
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
+    {
+      accessorKey: "created_at",
+      header: "Created",
+      enableSorting: true,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-xs">
+          {new Date(row.original.created_at).toLocaleDateString()}
+        </span>
+      ),
+    },
   ];
 
-  if (hasPermission("manage_users")) {
+  if (hasPermission("manage_leads")) {
     columns.push({
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
       enableSorting: false,
       cell: ({ row }) => {
-        const user = row.original;
+        const lead = row.original;
         return (
           <div className="text-right">
             <DropdownMenu>
@@ -193,38 +176,18 @@ export default function UsersPage() {
                   className="cursor-pointer"
                   disabled={isActionLoading}
                 >
-                  <UserCog className="mr-2 h-4 w-4" />
-                  Edit user
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  disabled={isActionLoading}
-                  onClick={() => handleOpenPermManager(user)}
-                >
-                  <KeyRound className="mr-2 h-4 w-4 text-primary" />
-                  Direct Permissions
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit lead
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border" />
-                {user.status !== "suspended" && (
-                  <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
-                    onClick={() => handleSuspend(user.id)}
-                    disabled={isActionLoading}
-                  >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Suspend user
-                  </DropdownMenuItem>
-                )}
-                {user.status !== "banned" && (
-                  <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
-                    onClick={() => handleBan(user.id)}
-                    disabled={isActionLoading}
-                  >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Ban user
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem
+                  className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                  onClick={() => handleDelete(lead.id)}
+                  disabled={isActionLoading}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete lead
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -235,41 +198,26 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      {selectedUser && (
-        <PermissionManager
-          isOpen={isPermManagerOpen}
-          onClose={() => {
-            setIsPermManagerOpen(false);
-            setSelectedUser(null);
-          }}
-          targetId={selectedUser.id}
-          targetName={selectedUser.name}
-          targetType="user"
-          currentPermissionIds={
-            selectedUser.direct_permissions?.map((p) => p.permission.id) || []
-          }
-          onSave={(ids: number[]) =>
-            userService.assignPermissions(selectedUser.id, ids)
-          }
-        />
-      )}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Users
+          Leads
         </h1>
-        {hasPermission("manage_users") && (
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            Add User
+        {hasPermission("manage_leads") && (
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground group">
+            <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
+            Add Lead
           </Button>
         )}
       </div>
 
       <Card className="bg-card border-border backdrop-blur-xl">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-card-foreground">All Users</CardTitle>
+          <CardTitle className="text-card-foreground">
+            Lead Management
+          </CardTitle>
           <div className="w-64">
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Search leads..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -285,7 +233,7 @@ export default function UsersPage() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : error || !data ? (
-            <div className="text-destructive">Failed to load users</div>
+            <div className="text-destructive">Failed to load leads</div>
           ) : (
             <DataTable
               columns={columns}

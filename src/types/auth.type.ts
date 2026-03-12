@@ -14,7 +14,7 @@ export interface IRefreshTokenResponse {
   success: boolean;
   message: string;
   data: {
-    token: string;
+    access_token: string;
     info: IAuthUser;
   };
 }

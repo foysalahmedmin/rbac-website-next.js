@@ -7,11 +7,11 @@ interface IResponse<T> {
 }
 
 export const permissionService = {
-  getAll: async (): Promise<IResponse<any[]>> => {
+  getAll: async (): Promise<IResponse<unknown[]>> => {
     return api.get("/permissions");
   },
 
-  getGrouped: async (): Promise<IResponse<any>> => {
+  getGrouped: async (): Promise<IResponse<unknown>> => {
     return api.get("/permissions/grouped");
   },
 };

@@ -4,9 +4,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import {
   Activity,
+  BarChart3,
+  Briefcase,
+  Globe,
   KeyRound,
   LayoutDashboard,
+  ListTodo,
   LogOut,
+  Settings,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -32,6 +37,18 @@ export function Sidebar() {
       icon: <LayoutDashboard size={20} />,
     },
     {
+      title: "Leads",
+      href: "/leads",
+      icon: <Briefcase size={20} />,
+      permission: "view_leads",
+    },
+    {
+      title: "Tasks",
+      href: "/tasks",
+      icon: <ListTodo size={20} />,
+      permission: "view_tasks",
+    },
+    {
       title: "Users",
       href: "/users",
       icon: <Users size={20} />,
@@ -50,10 +67,28 @@ export function Sidebar() {
       permission: "manage_roles",
     },
     {
+      title: "Reports",
+      href: "/reports",
+      icon: <BarChart3 size={20} />,
+      permission: "view_reports",
+    },
+    {
+      title: "Customer Portal",
+      href: "/customer-portal",
+      icon: <Globe size={20} />,
+      permission: "access_customer_portal",
+    },
+    {
       title: "Audit Logs",
       href: "/audit-logs",
       icon: <Activity size={20} />,
       permission: "view_audit_logs",
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: <Settings size={20} />,
+      permission: "manage_settings",
     },
   ];
 

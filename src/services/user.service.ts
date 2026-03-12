@@ -14,7 +14,9 @@ interface IResponse<T> {
 }
 
 export const userService = {
-  getAll: async (params?: Record<string, any>): Promise<IResponse<IUser[]>> => {
+  getAll: async (
+    params?: Record<string, unknown>,
+  ): Promise<IResponse<IUser[]>> => {
     return api.get("/users", { params });
   },
 
@@ -22,7 +24,7 @@ export const userService = {
     return api.get(`/users/${id}`);
   },
 
-  update: async (id: number, data: any): Promise<IResponse<IUser>> => {
+  update: async (id: number, data: unknown): Promise<IResponse<IUser>> => {
     return api.patch(`/users/${id}`, data);
   },
 
@@ -37,7 +39,7 @@ export const userService = {
   assignPermissions: async (
     userId: number,
     permissionIds: number[],
-  ): Promise<IResponse<any>> => {
+  ): Promise<IResponse<IUser>> => {
     return api.post(`/users/assign-permissions`, {
       user_id: userId,
       permission_ids: permissionIds,
