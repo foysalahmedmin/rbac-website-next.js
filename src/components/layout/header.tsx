@@ -16,14 +16,14 @@ export function Header() {
   const paths = pathname.split("/").filter((p) => p);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center border-b border-white/10 bg-slate-950/80 backdrop-blur-md px-6 shadow-sm">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center border-b border-border bg-background/80 backdrop-blur-md px-6 shadow-sm">
       <div className="flex flex-1 items-center justify-between">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
                 href="/dashboard"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Home
               </BreadcrumbLink>
@@ -38,16 +38,16 @@ export function Header() {
 
               return (
                 <React.Fragment key={path}>
-                  <BreadcrumbSeparator className="text-gray-600" />
+                  <BreadcrumbSeparator className="text-muted-foreground/50" />
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage className="text-gray-200 font-medium">
+                      <BreadcrumbPage className="text-foreground font-medium">
                         {title}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink
                         href={href}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {title}
                       </BreadcrumbLink>

@@ -5,11 +5,17 @@ interface IResponse<T> {
   success: boolean;
   message: string;
   data: T;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    total_page: number;
+  };
 }
 
 export const userService = {
-  getAll: async (): Promise<IResponse<IUser[]>> => {
-    return api.get("/users");
+  getAll: async (params?: Record<string, any>): Promise<IResponse<IUser[]>> => {
+    return api.get("/users", { params });
   },
 
   getById: async (id: number): Promise<IResponse<IUser>> => {

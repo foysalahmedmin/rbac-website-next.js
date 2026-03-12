@@ -63,10 +63,10 @@ export function Sidebar() {
   );
 
   return (
-    <div className="flex h-full w-64 flex-col justify-between border-r border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-xl">
+    <div className="flex h-full w-64 flex-col justify-between border-r border-border bg-card/50 backdrop-blur-xl p-4 shadow-xl">
       <div className="space-y-8">
         <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h2 className="mb-2 px-4 text-2xl font-bold tracking-tight bg-linear-to-r from-primary to-info bg-clip-text text-transparent">
             RBAC System
           </h2>
           <div className="space-y-1 mt-6">
@@ -74,18 +74,18 @@ export function Sidebar() {
               <Link key={item.href} href={item.href}>
                 <span
                   className={cn(
-                    "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium hover:bg-white/10 hover:text-white transition-colors",
+                    "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
                     pathname.startsWith(item.href)
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400",
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground",
                   )}
                 >
                   <span
                     className={cn(
                       "mr-3 transition-colors",
                       pathname.startsWith(item.href)
-                        ? "text-blue-400"
-                        : "text-gray-500 group-hover:text-blue-300",
+                        ? "text-primary"
+                        : "text-muted-foreground/50 group-hover:text-primary/70",
                     )}
                   >
                     {item.icon}
@@ -98,18 +98,18 @@ export function Sidebar() {
         </div>
       </div>
 
-      <div className="px-3 py-4 border-t border-white/10 space-y-4">
+      <div className="px-3 py-4 border-t border-border space-y-4">
         {user && (
-          <div className="px-4 py-3 rounded-lg bg-black/20 border border-white/5">
-            <p className="text-sm font-medium text-white break-all">
+          <div className="px-4 py-3 rounded-lg bg-secondary/20 border border-border">
+            <p className="text-sm font-medium text-foreground break-all">
               {user.name}
             </p>
-            <p className="text-xs text-gray-400">{user.role}</p>
+            <p className="text-xs text-muted-foreground">{user.role}</p>
           </div>
         )}
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-400/10"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={logout}
         >
           <LogOut className="mr-3" size={20} />

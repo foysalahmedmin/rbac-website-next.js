@@ -23,13 +23,13 @@ export default function PermissionsPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (error || !data) {
-    return <div className="text-red-400">Failed to load permissions</div>;
+    return <div className="text-destructive">Failed to load permissions</div>;
   }
 
   const groupedPermissions: Record<string, any[]> = data.data;
@@ -37,7 +37,7 @@ export default function PermissionsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Permissions
         </h1>
       </div>
@@ -46,22 +46,24 @@ export default function PermissionsPage() {
         {Object.entries(groupedPermissions).map(([resource, permissions]) => (
           <Card
             key={resource}
-            className="bg-white/5 border-white/10 backdrop-blur-xl"
+            className="bg-card border-border backdrop-blur-xl"
           >
             <CardHeader className="flex flex-row items-center gap-2">
-              <KeyRound className="h-5 w-5 text-purple-400" />
-              <CardTitle className="text-gray-200 capitalize">
+              <KeyRound className="h-5 w-5 text-primary" />
+              <CardTitle className="text-card-foreground capitalize">
                 {resource} Module
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border border-white/10">
+              <div className="rounded-md border border-border">
                 <Table>
-                  <TableHeader className="bg-black/20 hover:bg-black/20">
-                    <TableRow className="border-white/10">
-                      <TableHead className="text-gray-400">Action</TableHead>
-                      <TableHead className="text-gray-400">
-                        Permission Name
+                  <TableHeader className="bg-muted/50">
+                    <TableRow className="border-border">
+                      <TableHead className="text-muted-foreground">
+                        Action
+                      </TableHead>
+                      <TableHead className="text-muted-foreground">
+                        Permission Slug
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -69,15 +71,15 @@ export default function PermissionsPage() {
                     {permissions.map((permission) => (
                       <TableRow
                         key={permission.id}
-                        className="border-white/10 hover:bg-white/5 transition-colors"
+                        className="border-border hover:bg-muted/50 transition-colors"
                       >
-                        <TableCell className="font-medium text-gray-200 capitalize">
+                        <TableCell className="font-medium text-foreground capitalize">
                           {permission.action}
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant="outline"
-                            className="text-blue-400 border-blue-400/30"
+                            variant="secondary"
+                            className="bg-secondary text-secondary-foreground"
                           >
                             {permission.name}
                           </Badge>

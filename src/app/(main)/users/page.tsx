@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,17 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/providers/auth-provider";
 import { userService } from "@/services/user.service";
+import { IUser } from "@/types/user.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
   Ban,
   Loader2,
@@ -36,10 +32,30 @@ export default function UsersPage() {
   const { hasPermission } = useAuth();
   const queryClient = useQueryClient();
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => userService.getAll(),
+    queryKey: [
+      "users",
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      search,
+    ],
+    queryFn: () => {
+      const sortParams = sorting
+        .map((s) => (s.desc ? `-${s.id}` : s.id))
+        .join(",");
+
+      return userService.getAll({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        ...(sortParams ? { sort: sortParams } : {}),
+        ...(search ? { search } : {}),
+      });
+    },
   });
 
   const suspendMutation = useMutation({
@@ -48,7 +64,7 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User suspended successfully");
     },
-    onError: (error: any) =>
+    onError: (error: Error) =>
       toast.error(error.message || "Failed to suspend user"),
     onSettled: () => setIsActionLoading(false),
   });
@@ -59,21 +75,10 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User banned successfully");
     },
-    onError: (error: any) => toast.error(error.message || "Failed to ban user"),
+    onError: (error: Error) =>
+      toast.error(error.message || "Failed to ban user"),
     onSettled: () => setIsActionLoading(false),
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return <div className="text-red-400">Failed to load users</div>;
-  }
 
   const handleSuspend = (id: number) => {
     setIsActionLoading(true);
@@ -89,141 +94,173 @@ export default function UsersPage() {
     switch (status) {
       case "active":
         return (
-          <Badge className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border-green-500/50">
+          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
             Active
           </Badge>
         );
       case "suspended":
         return (
-          <Badge className="bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 border-yellow-500/50">
+          <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30">
             Suspended
           </Badge>
         );
       case "banned":
         return (
-          <Badge className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/50">
+          <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/80">
             Banned
           </Badge>
         );
       default:
-        return <Badge className="bg-gray-500/20 text-gray-400">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  const columns: ColumnDef<IUser>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      enableSorting: true,
+      cell: ({ row }) => (
+        <span className="font-medium text-foreground">{row.original.name}</span>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      enableSorting: true,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.email}</span>
+      ),
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <span className="text-muted-foreground capitalize">
+            {typeof row.original.role === "string"
+              ? row.original.role
+              : (row.original.role as { name: string })?.name}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      enableSorting: true,
+      cell: ({ row }) => getStatusBadge(row.original.status),
+    },
+  ];
+
+  if (hasPermission("manage_users")) {
+    columns.push({
+      id: "actions",
+      header: () => <div className="text-right">Actions</div>,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                >
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="bg-popover border-border text-foreground"
+              >
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  disabled={isActionLoading}
+                >
+                  <UserCog className="mr-2 h-4 w-4" />
+                  Edit user
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border" />
+                {user.status !== "suspended" && (
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    onClick={() => handleSuspend(user.id)}
+                    disabled={isActionLoading}
+                  >
+                    <Ban className="mr-2 h-4 w-4" />
+                    Suspend user
+                  </DropdownMenuItem>
+                )}
+                {user.status !== "banned" && (
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    onClick={() => handleBan(user.id)}
+                    disabled={isActionLoading}
+                  >
+                    <Ban className="mr-2 h-4 w-4" />
+                    Ban user
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    });
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-white">Users</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Users
+        </h1>
         {hasPermission("manage_users") && (
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
             Add User
           </Button>
         )}
       </div>
 
-      <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-gray-200">All Users</CardTitle>
+      <Card className="bg-card border-border backdrop-blur-xl">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-card-foreground">All Users</CardTitle>
+          <div className="w-64">
+            <Input
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+              }}
+              className="bg-background border-border"
+            />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-white/10">
-            <Table>
-              <TableHeader className="bg-black/20 hover:bg-black/20">
-                <TableRow className="border-white/10">
-                  <TableHead className="text-gray-400">Name</TableHead>
-                  <TableHead className="text-gray-400">Email</TableHead>
-                  <TableHead className="text-gray-400">Role</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-right text-gray-400">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.data.map((user: any) => (
-                  <TableRow
-                    key={user.id}
-                    className="border-white/10 hover:bg-white/5 transition-colors"
-                  >
-                    <TableCell className="font-medium text-gray-200">
-                      {user.name}
-                    </TableCell>
-                    <TableCell className="text-gray-400">
-                      {user.email}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="h-4 w-4 text-blue-400" />
-                        <span className="text-gray-300 capitalize">
-                          {user.role?.name || user.role}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(user.status)}</TableCell>
-                    <TableCell className="text-right">
-                      {hasPermission("manage_users") && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/10"
-                            >
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="bg-slate-900 border-white/10 text-gray-200"
-                          >
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
-                              disabled={isActionLoading}
-                            >
-                              <UserCog className="mr-2 h-4 w-4" />
-                              Edit user
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            {user.status !== "suspended" && (
-                              <DropdownMenuItem
-                                className="cursor-pointer text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 focus:bg-yellow-400/10 focus:text-yellow-300"
-                                onClick={() => handleSuspend(user.id)}
-                                disabled={isActionLoading}
-                              >
-                                <Ban className="mr-2 h-4 w-4" />
-                                Suspend user
-                              </DropdownMenuItem>
-                            )}
-                            {user.status !== "banned" && (
-                              <DropdownMenuItem
-                                className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-400/10 focus:bg-red-400/10 focus:text-red-300"
-                                onClick={() => handleBan(user.id)}
-                                disabled={isActionLoading}
-                              >
-                                <Ban className="mr-2 h-4 w-4" />
-                                Ban user
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {data.data.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="h-24 text-center text-gray-500 hover:bg-transparent"
-                    >
-                      No users found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : error || !data ? (
+            <div className="text-destructive">Failed to load users</div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={data.data}
+              pageCount={data.meta?.total_page || 1}
+              pagination={pagination}
+              onPaginationChange={setPagination}
+              sorting={sorting}
+              onSortingChange={setSorting}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
