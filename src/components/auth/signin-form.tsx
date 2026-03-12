@@ -31,6 +31,7 @@ export function SigninForm() {
   const { login } = useAuth();
 
   const form = useForm<SigninValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(signinSchema as any),
     defaultValues: {
       email: "",

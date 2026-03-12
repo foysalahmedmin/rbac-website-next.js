@@ -7,8 +7,6 @@ export function middleware(request: NextRequest) {
   // and ProtectedRoute on the client side for actual permission enforcement,
   // but we can do a preliminary check.
 
-  const token = request.cookies.get("accessToken")?.value;
-
   // For this assignment, we mostly rely on client-side routing & ProtectedRoute,
   // but this middleware can redirect unauthenticated users globally.
   if (

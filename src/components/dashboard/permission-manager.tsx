@@ -107,8 +107,10 @@ export function PermissionManager({
 
   if (!isOpen) return null;
 
-  const groupedPermissions: Record<string, Permission[]> =
-    groupedData?.data || {};
+  const groupedPermissions = (groupedData?.data || {}) as Record<
+    string,
+    Permission[]
+  >;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

@@ -32,6 +32,7 @@ export function SignupForm() {
   const { login } = useAuth();
 
   const form = useForm<SignupValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(signupSchema as any),
     defaultValues: {
       name: "",

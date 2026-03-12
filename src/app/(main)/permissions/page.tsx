@@ -14,6 +14,14 @@ import { permissionService } from "@/services/permission.service";
 import { useQuery } from "@tanstack/react-query";
 import { KeyRound, Loader2 } from "lucide-react";
 
+interface Permission {
+  id: number;
+  name: string;
+  slug: string;
+  module: string;
+  action: string;
+}
+
 export default function PermissionsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["permissions-grouped"],
@@ -32,7 +40,7 @@ export default function PermissionsPage() {
     return <div className="text-destructive">Failed to load permissions</div>;
   }
 
-  const groupedPermissions: Record<string, any[]> = data.data;
+  const groupedPermissions = (data.data || {}) as Record<string, Permission[]>;
 
   return (
     <div className="space-y-6">
