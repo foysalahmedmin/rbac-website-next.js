@@ -148,7 +148,10 @@ export default function AuditLogsPage() {
               pagination={pagination}
               onPaginationChange={setPagination}
               sorting={sorting}
-              onSortingChange={setSorting}
+              onSortingChange={(updater) => {
+                setSorting(updater);
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+              }}
             />
           )}
         </CardContent>
