@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       try {
         const storedUser = localStorage.getItem("user");
-        const token = getCookie("accessToken") as string | undefined;
+        const token = getCookie("access_token") as string | undefined;
 
         if (storedUser && token) {
           setUser(JSON.parse(storedUser));
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await authService.refreshToken();
         if (response.success) {
           setAccessToken(response.data.access_token);
-          setCookie("accessToken", response.data.access_token, {
+          setCookie("access_token", response.data.access_token, {
             maxAge: 60 * 60 * 24 * 7, // 7 days expiration for app client (example)
             path: "/",
           });
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Auth initialization failed:", error);
         // Clean up invalid state
-        deleteCookie("accessToken");
+        deleteCookie("access_token");
         localStorage.removeItem("user");
         setUser(null);
       } finally {
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (token: string, user: IAuthUser) => {
     setAccessToken(token);
-    setCookie("accessToken", token, {
+    setCookie("access_token", token, {
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setAccessToken(null);
-    deleteCookie("accessToken");
+    deleteCookie("access_token");
     localStorage.removeItem("user");
     setUser(null);
     router.push("/signin");

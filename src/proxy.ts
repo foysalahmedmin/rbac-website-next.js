@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("accessToken")?.value;
+  const token = request.cookies.get("access_token")?.value;
 
   // Protect all dashboard and main layout routes
   if (

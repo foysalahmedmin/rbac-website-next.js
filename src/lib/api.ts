@@ -8,16 +8,16 @@ export const api = axios.create({
   },
 });
 
-let accessToken: string | null = null;
+let access_token: string | null = null;
 
 export const setAccessToken = (token: string | null) => {
-  accessToken = token;
+  access_token = token;
 };
 
 api.interceptors.request.use(
   (config) => {
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (access_token) {
+      config.headers.Authorization = `Bearer ${access_token}`;
     }
     return config;
   },
