@@ -237,8 +237,8 @@ export default function RolesPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data.data}
-              pageCount={data.meta?.total_page || 1}
+              data={data?.data || []}
+              pageCount={data?.meta?.total_page || 1}
               pagination={pagination}
               onPaginationChange={setPagination}
               sorting={sorting}
