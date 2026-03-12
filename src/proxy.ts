@@ -2,23 +2,34 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Extract token from request headers or cookies if stored there.
-  // In a real app we might verify the JWT. Here we rely on AuthProvider
-  // and ProtectedRoute on the client side for actual permission enforcement,
-  // but we can do a preliminary check.
+  const token = request.cookies.get("accessToken")?.value;
 
-  // For this assignment, we mostly rely on client-side routing & ProtectedRoute,
-  // but this middleware can redirect unauthenticated users globally.
+  // Protect all dashboard and main layout routes
   if (
     request.nextUrl.pathname.startsWith("/dashboard") ||
     request.nextUrl.pathname.startsWith("/users") ||
     request.nextUrl.pathname.startsWith("/roles") ||
     request.nextUrl.pathname.startsWith("/permissions") ||
-    request.nextUrl.pathname.startsWith("/audit-logs")
+    request.nextUrl.pathname.startsWith("/audit-logs") ||
+    request.nextUrl.pathname.startsWith("/leads") ||
+    request.nextUrl.pathname.startsWith("/tasks") ||
+    request.nextUrl.pathname.startsWith("/reports") ||
+    request.nextUrl.pathname.startsWith("/customer-portal") ||
+    request.nextUrl.pathname.startsWith("/settings")
   ) {
-    // Just a placeholder, as we use localStorage for the token currently (client-side)
-    // and middleware runs on the server where localStorage isn't available.
-    // So we will just pass through and let the client-side ProtectedRoute handle it.
+    if (!token) {
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (
+    request.nextUrl.pathname.startsWith("/signin") ||
+    request.nextUrl.pathname.startsWith("/signup")
+  ) {
+    if (token) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
   return NextResponse.next();

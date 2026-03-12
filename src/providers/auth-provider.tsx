@@ -23,6 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { setAccessToken } from "@/lib/api";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IAuthUser | null>(null);
@@ -33,23 +34,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       try {
         const storedUser = localStorage.getItem("user");
-        if (storedUser) {
+        const token = getCookie("accessToken") as string | undefined;
+
+        if (storedUser && token) {
           setUser(JSON.parse(storedUser));
+          setAccessToken(token);
         }
 
         // Try to get a fresh access token using the refresh token cookie
         const response = await authService.refreshToken();
         if (response.success) {
           setAccessToken(response.data.access_token);
+          setCookie("accessToken", response.data.access_token, {
+            maxAge: 60 * 60 * 24 * 7, // 7 days expiration for app client (example)
+            path: "/",
+          });
           setUser(response.data.info);
           localStorage.setItem("user", JSON.stringify(response.data.info));
         }
       } catch (error) {
         console.error("Auth initialization failed:", error);
-        // If refresh fails, we might still have a stored user, but no token.
-        // We should probably clear it if we want strict security.
-        // localStorage.removeItem("user");
-        // setUser(null);
+        // Clean up invalid state
+        deleteCookie("accessToken");
+        localStorage.removeItem("user");
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -60,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (token: string, user: IAuthUser) => {
     setAccessToken(token);
+    setCookie("accessToken", token, {
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
     router.push("/dashboard");
@@ -67,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setAccessToken(null);
+    deleteCookie("accessToken");
     localStorage.removeItem("user");
     setUser(null);
     router.push("/signin");
