@@ -404,4 +404,4 @@ The `vercel.json` is configured for seamless Vercel deployment:
 
 ## License
 
-Proprietary and Confidential — Digital Pylot. Unauthorized duplication or distribution is strictly prohibited.
+Proprietary and Confidential. Unauthorized duplication or distribution is strictly prohibited.
