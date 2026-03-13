@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -155,8 +156,14 @@ export function AppSidebar() {
     >
       <SidebarHeader className="h-16 md:h-20 flex-col items-center justify-center flex px-6 border-b bg-card/10 backdrop-blur-sm">
         <div className="flex items-center gap-2 overflow-hidden">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-            <ShieldCheck className="h-6 w-6" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+            <Image
+              src="/favicon.ico"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+            />
           </div>
           <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
             <span className="text-lg font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -169,7 +176,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 flex-1 overflow-y-auto py-4">
+      <SidebarContent className="px-2 bg-transparent flex-1 overflow-y-auto py-4">
         {navItems.map((element) => {
           if ("items" in element) {
             const hasVisibleItems = element.items.some(
