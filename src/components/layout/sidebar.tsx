@@ -98,7 +98,7 @@ export function Sidebar() {
   );
 
   return (
-    <div className="flex h-full w-64 flex-col justify-between border-r border-border bg-card/50 backdrop-blur-xl p-4 shadow-xl">
+    <div className="flex h-full w-64 flex-col justify-between border-r border-border bg-transparent backdrop-blur-xl p-4 shadow-xl">
       <div className="space-y-8">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-2xl font-bold tracking-tight bg-linear-to-r from-primary to-info bg-clip-text text-transparent">

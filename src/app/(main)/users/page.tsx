@@ -1,9 +1,16 @@
 "use client";
 
 import { PermissionManager } from "@/components/dashboard/permission-manager";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
@@ -24,8 +31,13 @@ import {
   KeyRound,
   Loader2,
   MoreHorizontal,
+  Plus,
+  Search,
   ShieldCheck,
+  UserCheck,
   UserCog,
+  Users,
+  UserX,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -106,19 +118,19 @@ export default function UsersPage() {
     switch (status) {
       case "active":
         return (
-          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
+          <Badge className="bg-success/20 text-success border-success/20 animate-pulse-slow">
             Active
           </Badge>
         );
       case "suspended":
         return (
-          <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30">
+          <Badge className="bg-warning/20 text-warning border-warning/20">
             Suspended
           </Badge>
         );
       case "banned":
         return (
-          <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/80">
+          <Badge className="bg-destructive/20 text-destructive border-destructive/20">
             Banned
           </Badge>
         );
@@ -130,32 +142,61 @@ export default function UsersPage() {
   const columns: ColumnDef<IUser>[] = [
     {
       accessorKey: "name",
-      header: "Name",
+      header: "User",
       enableSorting: true,
       cell: ({ row }) => (
-        <span className="font-medium text-foreground">{row.original.name}</span>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9 border border-primary/10 shadow-xs">
+            <AvatarImage
+              src={`https://avatar.iran.liara.run/public/${row.original.id % 100}`}
+            />
+            <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+              {row.original.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-semibold text-foreground leading-tight">
+              {row.original.name}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              ID: #{row.original.id}
+            </span>
+          </div>
+        </div>
       ),
     },
     {
       accessorKey: "email",
-      header: "Email",
+      header: "Email Address",
       enableSorting: true,
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{row.original.email}</span>
+        <span className="text-muted-foreground font-medium">
+          {row.original.email}
+        </span>
       ),
     },
     {
       accessorKey: "role",
-      header: "Role",
+      header: "System Role",
       enableSorting: false,
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-foreground">
-          <ShieldCheck className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground capitalize">
-            {row.original.role.name}
-          </span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const role = row.original.role.name;
+        const isAdmin = role === "admin";
+        return (
+          <div className="flex items-center gap-2">
+            <div
+              className={`p-1 rounded-md ${isAdmin ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+            </div>
+            <span
+              className={`text-sm font-bold capitalize ${isAdmin ? "text-primary" : "text-muted-foreground"}`}
+            >
+              {role}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "status",
@@ -178,51 +219,48 @@ export default function UsersPage() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  className="h-8 w-8 p-0 hover:bg-accent transition-colors"
                 >
-                  <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="bg-popover border-border text-foreground"
-              >
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  disabled={isActionLoading}
-                >
-                  <UserCog className="mr-2 h-4 w-4" />
-                  Edit user
+              <DropdownMenuContent align="end" className="w-48 rounded-xl p-2">
+                <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5 uppercase font-bold tracking-wider">
+                  Management
+                </DropdownMenuLabel>
+                <DropdownMenuItem className="rounded-lg cursor-pointer">
+                  <UserCog className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Edit Details
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="cursor-pointer"
-                  disabled={isActionLoading}
+                  className="rounded-lg cursor-pointer"
                   onClick={() => handleOpenPermManager(user)}
                 >
                   <KeyRound className="mr-2 h-4 w-4 text-primary" />
-                  Direct Permissions
+                  Manage Permissions
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuSeparator className="my-1" />
+                <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5 uppercase font-bold tracking-wider">
+                  Account Action
+                </DropdownMenuLabel>
                 {user.status !== "suspended" && (
                   <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    className="rounded-lg cursor-pointer text-warning focus:text-warning focus:bg-warning/10"
                     onClick={() => handleSuspend(user.id)}
                     disabled={isActionLoading}
                   >
                     <Ban className="mr-2 h-4 w-4" />
-                    Suspend user
+                    Suspend User
                   </DropdownMenuItem>
                 )}
                 {user.status !== "banned" && (
                   <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    className="rounded-lg cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                     onClick={() => handleBan(user.id)}
                     disabled={isActionLoading}
                   >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Ban user
+                    <UserX className="mr-2 h-4 w-4" />
+                    Ban Account
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -234,7 +272,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {selectedUser && (
         <PermissionManager
           isOpen={isPermManagerOpen}
@@ -253,39 +291,133 @@ export default function UsersPage() {
           }
         />
       )}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Users
-        </h1>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            User Management
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium">
+            Manage your organization&apos;s users, roles and high-level permissions.
+          </p>
+        </div>
         {hasPermission("manage_users") && (
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            Add User
+          <Button className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 group">
+            <Plus className="mr-2 h-5 w-5 transition-transform group-hover:rotate-90" />
+            Create New User
           </Button>
         )}
       </div>
 
-      <Card className="bg-card border-border backdrop-blur-xl">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-card-foreground">All Users</CardTitle>
-          <div className="w-64">
-            <Input
-              placeholder="Search by name or email..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-              }}
-              className="bg-background border-border"
-            />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Total Users",
+            value: "156",
+            icon: Users,
+            color: "text-primary",
+            bg: "bg-primary/10",
+          },
+          {
+            label: "Active Now",
+            value: "142",
+            icon: UserCheck,
+            color: "text-success",
+            bg: "bg-success/10",
+          },
+          {
+            label: "Suspended",
+            value: "8",
+            icon: Ban,
+            color: "text-warning",
+            bg: "bg-warning/10",
+          },
+          {
+            label: "Banned",
+            value: "6",
+            icon: UserX,
+            color: "text-destructive",
+            bg: "bg-destructive/10",
+          },
+        ].map((stat, i) => (
+          <Card
+            key={i}
+            className="bg-card/40 border-border/50 backdrop-blur-sm shadow-xs"
+          >
+            <CardContent className="p-4 flex items-center gap-4">
+              <div
+                className={`h-12 w-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}
+              >
+                <stat.icon size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/70">
+                  {stat.label}
+                </p>
+                <p className="text-xl font-extrabold leading-none mt-1">
+                  {stat.value}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="bg-card/50 border-border backdrop-blur-xl shadow-md rounded-2xl overflow-hidden">
+        <CardHeader className="border-b border-border/50 bg-muted/20 px-6 py-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg font-bold">
+                Directory List
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Browse and manage all registered accounts
+              </CardDescription>
+            </div>
+            <div className="relative w-full md:w-72 group">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                placeholder="Find by name, email..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+                }}
+                className="h-10 pl-10 bg-background/50 border-border/50 focus:bg-background transition-all rounded-xl"
+              />
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex flex-col items-center justify-center p-20 space-y-4">
+              <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
+              <p className="text-sm font-medium text-muted-foreground animate-pulse">
+                Syncing directory...
+              </p>
             </div>
           ) : error || !data ? (
-            <div className="text-destructive">Failed to load users</div>
+            <div className="p-20 text-center space-y-4">
+              <div className="h-16 w-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto">
+                <UserX size={32} />
+              </div>
+              <p className="text-destructive font-bold text-lg">
+                Connection Error
+              </p>
+              <p className="text-muted-foreground max-w-xs mx-auto">
+                We couldn&apos;t retrieve the user list. Please check your
+                network or try again.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  queryClient.invalidateQueries({ queryKey: ["users"] })
+                }
+              >
+                Retry Connection
+              </Button>
+            </div>
           ) : (
             <DataTable
               columns={columns}
