@@ -20,7 +20,9 @@ export const auditLogService = {
     return api.get("/audit-logs", { params });
   },
 
-  getByUserId: async (userId: number): Promise<IResponse<IAuditLog[]>> => {
-    return api.get(`/audit-logs/user/${userId}`);
+  getMyLogs: async (
+    params?: Record<string, unknown>,
+  ): Promise<IResponse<IAuditLog[]>> => {
+    return api.get("/audit-logs/me", { params });
   },
 };
