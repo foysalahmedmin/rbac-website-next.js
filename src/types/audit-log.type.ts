@@ -1,12 +1,11 @@
 export interface IAuditLog {
   id: number;
-  user_id: number | null;
+  user_id: number;
   action: string;
   resource: string;
-  resource_id: number | null;
-  details: Record<string, unknown>;
+  resource_id: string | null;
+  details: Record<string, unknown> | null;
   ip_address: string | null;
-  user_agent: string | null;
   created_at: string;
   user?: {
     name: string;

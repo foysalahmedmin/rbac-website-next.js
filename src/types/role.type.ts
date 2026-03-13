@@ -2,7 +2,6 @@ export interface IRole {
   id: number;
   name: string;
   description: string | null;
-  is_active: boolean;
   permissions?: {
     permission: {
       id: number;

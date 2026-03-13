@@ -2,6 +2,7 @@ import { api } from "@/lib/api";
 
 interface IResponse<T> {
   success: boolean;
+  status: number;
   message: string;
   data: T;
 }

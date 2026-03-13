@@ -3,6 +3,7 @@ import { ILead } from "@/types/lead.type";
 
 interface IResponse<T> {
   success: boolean;
+  status: number;
   message: string;
   data: T;
   meta?: {

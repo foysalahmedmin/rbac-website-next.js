@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { Checkbox } from "../ui/checkbox";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -57,11 +58,9 @@ export function SignupForm() {
   }
 
   return (
-    <Card className="w-full max-w-md border-border bg-card/10 backdrop-blur-xl text-foreground shadow-2xl">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-3xl font-bold tracking-tight text-center bg-linear-to-r from-success to-info bg-clip-text text-transparent">
-          Create Account
-        </CardTitle>
+    <Card className="w-full max-w-md border-0 bg-card/10 backdrop-blur-xl text-foreground shadow-2xl px-8 py-8">
+      <CardHeader className="space-y-1 mb-4">
+        <CardTitle className="text-2xl text-center">Sign Up</CardTitle>
         <CardDescription className="text-center text-muted-foreground">
           Join our RBAC system today
         </CardDescription>
@@ -69,7 +68,7 @@ export function SignupForm() {
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-foreground">
+            <Label htmlFor="name" className="text-muted-foreground">
               Full Name
             </Label>
             <Input
@@ -77,7 +76,7 @@ export function SignupForm() {
               placeholder="John Doe"
               type="text"
               disabled={isLoading}
-              className="bg-secondary/10 border-border text-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
+              className="bg-secondary/10 border-border text-muted-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
               {...form.register("name")}
             />
             {form.formState.errors.name && (
@@ -87,15 +86,15 @@ export function SignupForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">
+            <Label htmlFor="email" className="text-muted-foreground">
               Email
             </Label>
             <Input
               id="email"
-              placeholder="name@example.com"
+              placeholder="example@example.com"
               type="email"
               disabled={isLoading}
-              className="bg-secondary/10 border-border text-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
+              className="bg-secondary/10 border-border text-muted-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
               {...form.register("email")}
             />
             {form.formState.errors.email && (
@@ -105,14 +104,15 @@ export function SignupForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-foreground">
+            <Label htmlFor="password" className="text-muted-foreground">
               Password
             </Label>
             <Input
               id="password"
               type="password"
               disabled={isLoading}
-              className="bg-secondary/10 border-border text-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
+              className="bg-secondary/10 border-border text-muted-foreground placeholder:text-muted-foreground/50 focus:border-success/50 transition-all"
+              placeholder="Enter your password"
               {...form.register("password")}
             />
             {form.formState.errors.password && (
@@ -121,20 +121,18 @@ export function SignupForm() {
               </p>
             )}
           </div>
-          <Button
-            className="w-full bg-success hover:bg-success/90 text-success-foreground font-semibold py-6 shadow-lg shadow-success/20 transition-all active:scale-[0.98]"
-            type="submit"
-            disabled={isLoading}
-          >
+          <div className="flex items-center">
+            <label className="flex items-center text-muted-foreground gap-2">
+              <Checkbox /> Remember me
+            </label>
+          </div>
+          <Button className="w-full" type="submit" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Sign Up"}
           </Button>
           <div className="text-center mt-4">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link
-                href="/signin"
-                className="text-success hover:text-success/80 font-medium underline underline-offset-4"
-              >
+              <Link href="/signin" className="text-foreground">
                 Sign in
               </Link>
             </p>

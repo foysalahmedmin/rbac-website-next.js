@@ -109,21 +109,6 @@ export default function RolesPage() {
         </span>
       ),
     },
-    {
-      accessorKey: "is_active",
-      header: "Status",
-      enableSorting: false,
-      cell: ({ row }) =>
-        row.original.is_active ? (
-          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
-            Active
-          </Badge>
-        ) : (
-          <Badge variant="secondary" className="text-muted-foreground">
-            Inactive
-          </Badge>
-        ),
-    },
   ];
 
   if (hasPermission("manage_roles")) {
