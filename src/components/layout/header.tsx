@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/providers/auth-provider";
 import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import Link from "next/link";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -85,14 +86,18 @@ export function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="mx-2" />
               <DropdownMenuGroup>
-                <DropdownMenuItem className="rounded-lg h-10 cursor-pointer">
-                  <User className="mr-3 h-4 w-4 text-muted-foreground" />
-                  <span>Account Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg h-10 cursor-pointer">
-                  <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
-                  <span>General Settings</span>
-                </DropdownMenuItem>
+                <Link href="/profile">
+                  <DropdownMenuItem className="rounded-lg h-10 cursor-pointer">
+                    <User className="mr-3 h-4 w-4 text-muted-foreground" />
+                    <span>Account Profile</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/settings">
+                  <DropdownMenuItem className="rounded-lg h-10 cursor-pointer">
+                    <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                    <span>General Settings</span>
+                  </DropdownMenuItem>
+                </Link>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="mx-2" />
               <DropdownMenuItem

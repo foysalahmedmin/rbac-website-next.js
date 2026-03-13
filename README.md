@@ -1,6 +1,6 @@
 # RBAC Website
 
-This is the frontend client for the Dynamic Permission-Based Role Access Control (RBAC) system. Built with Next.js App Router and Shadcn UI, it delivers a Glassmorphism-styled dashboard where every navigation item, button, and data table is assembled at runtime based on the authenticated user's resolved permission set. What a user sees is never hardcoded by role — it is dynamically composed from atomic permission slugs.
+This is the frontend client for the Dynamic Permission-Based Role Access Control (RBAC) system. Built with Next.js App Router and Shadcn UI, it delivers an **Ultra-Modern, Ultra-Premium Glassmorphism-styled dashboard**. Every navigation item, button, and data table is assembled at runtime based on the authenticated user's resolved permission set. What a user sees is never hardcoded by role — it is dynamically composed from atomic permission slugs, wrapped in a high-fidelity visual experience.
 
 ---
 
@@ -52,16 +52,17 @@ This is the frontend client for the Dynamic Permission-Based Role Access Control
 
 ### Dashboard Modules
 
-- **Dashboard**: Overview cards and summary metrics.
-- **Users**: User listing with suspend, ban, restore, delete, and direct permission assignment capabilities.
-- **Roles**: Role management with permission assignment via the Permission Manager component.
-- **Permissions**: Grouped view of all available permission atoms organized by module.
-- **Leads**: CRM lead records with full CRUD.
-- **Tasks**: Task assignment and status tracking.
+- **Dashboard**: Revamped with role-based visibility. Admins see mission-critical metrics and system health, while Customers receive a polished onboarding experience.
+- **Users**: High-fidelity user management with quick-stats cards, avatars, and intuitive status controls.
+- **Roles**: Security tier management with permission assignment via the Permission Manager component.
+- **Permissions**: Grouped view of all available permission atoms organized by module matrix.
+- **Leads**: CRM lead records with sales pipeline visualization and real-time status tracking.
+- **Tasks**: Work assignment engine with priority indicators, deadline tracking, and assignee avatars.
+- **Profile**: A personalized command center for the user, displaying their verified identity and active privilege matrix.
 - **Reports**: Report listing and storage access.
-- **Audit Logs**: Full system audit trail and personal activity log.
-- **Customer Portal**: Self-service portal for customers.
-- **Settings**: Account and system settings.
+- **Audit Logs**: Immutable security ledger with timestamped event tracking.
+- **Customer Portal**: High-end service portal with professional branding for external clients.
+- **Settings**: Comprehensive account control center for identity sync and credential rotation.
 
 ### Data Management
 
@@ -219,6 +220,7 @@ src/
 │   │   ├── leads/page.tsx
 │   │   ├── tasks/page.tsx
 │   │   ├── reports/page.tsx
+│   │   ├── profile/page.tsx          # New: User identity command center
 │   │   ├── customer-portal/page.tsx
 │   │   └── settings/page.tsx
 │   ├── globals.css                   # Glassmorphism design tokens and CSS variables
@@ -283,8 +285,9 @@ src/
 | `/leads`           | `(main)` | `view_leads`        | CRM lead records                     |
 | `/tasks`           | `(main)` | `view_tasks`        | Task management and assignment       |
 | `/reports`         | `(main)` | `view_reports`      | Business report storage and viewer   |
-| `/customer-portal` | `(main)` | Authenticated       | Self-service customer portal         |
-| `/settings`        | `(main)` | Authenticated       | Account and system settings          |
+| `/profile`         | `(main)` | Authenticated       | User identity and privilege matrix   |
+| `/customer-portal` | `(main)` | Authenticated       | High-end self-service portal         |
+| `/settings`        | `(main)` | Authenticated       | Account control and security center  |
 
 ---
 

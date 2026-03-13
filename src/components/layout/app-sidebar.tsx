@@ -24,6 +24,7 @@ import {
   LucideIcon,
   Settings,
   ShieldCheck,
+  User,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -49,6 +50,11 @@ const navItems: NavElement[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Profile",
+    href: "/profile",
+    icon: User,
   },
   {
     title: "Leads",
